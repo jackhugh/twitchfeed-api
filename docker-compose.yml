@@ -1,0 +1,84 @@
+version: '3.9'
+services:
+    web:
+        build:
+            context: ./docker/web/
+            dockerfile: Dockerfile
+        image: php-framework-web
+        restart: on-failure
+        container_name: ${APP_NAME}-web
+        working_dir: /var/www
+        volumes:
+            - ./:/var/www
+        ports:
+            - ${APACHE_PORT}:80
+        networks:
+            - php-framework
+
+    priority-updater:
+        build:
+            context: ./docker/realtime
+            dockerfile: Dockerfile
+        image: php-framework-realtime
+        restart: on-failure
+        depends_on:
+            - mysql
+        container_name: ${APP_NAME}-priority-updater
+        working_dir: /var/www
+        command: php ./App/Scripts/start_service.php \\App\\Services\\PriorityUpdateService
+        volumes:
+            - ./:/var/www
+        networks:
+            - php-framework
+
+    updater:
+        build:
+            context: ./docker/realtime
+            dockerfile: Dockerfile
+        image: php-framework-realtime
+        restart: on-failure
+        depends_on:
+            - mysql
+        container_name: ${APP_NAME}-updater
+        working_dir: /var/www
+        command: php ./App/Scripts/start_service.php \\App\\Services\\UpdateService
+        volumes:
+            - ./:/var/www
+        networks:
+            - php-framework
+
+    mysql:
+        image: mysql:latest
+        restart: on-failure
+        container_name: ${APP_NAME}-mysql
+        command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_520_ci
+        environment:
+            MYSQL_DATABASE: ${DB_NAME}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_USER: ${DB_USER}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+        volumes:
+            - ./docker/mysql:/docker-entrypoint-initdb.d
+            - mysql-data:/var/lib/mysql
+        networks:
+            - php-framework
+
+    phpmyadmin:
+        image: phpmyadmin
+        restart: on-failure
+        container_name: ${APP_NAME}-phpmyadmin
+        ports:
+            - 8081:80
+        logging:
+            driver: 'none'
+        environment:
+            PMA_HOST: mysql
+        networks:
+            - php-framework
+
+networks:
+    php-framework:
+        driver: bridge
+
+volumes:
+    mysql-data:

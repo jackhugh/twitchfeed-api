@@ -1,0 +1,20 @@
+{
+    "name": "jackhugh/php-framework",
+    "authors": [
+        {
+            "name": "jackhugh",
+            "email": "24830612+jackhugh@users.noreply.github.com"
+        }
+    ],
+	"scripts": {
+		"generate-schema": "docker exec twitch-mysql mysqldump -uroot -ppassword --no-data twitch-api > ./docker/mysql/schema.sql && docker exec twitch-mysql mysqldump -uroot -ppassword --no-create-info twitch-api periods >> ./docker/mysql/schema.sql"
+	},
+    "autoload": {
+        "psr-4": {
+			"": ""
+		}
+    },
+    "require": {
+        "vlucas/phpdotenv": "^5.3"
+    }
+}

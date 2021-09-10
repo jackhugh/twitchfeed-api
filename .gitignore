@@ -1,0 +1,6 @@
+.env
+.DS_Store
+error_log
+vendor/
+logs/
+sess/
